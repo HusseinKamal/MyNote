@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPagingApi::class)
+
 package com.hussein.mynote
 
 import android.os.Bundle
@@ -10,19 +12,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import androidx.paging.ExperimentalPagingApi
+import com.hussein.mynote.navigation.HomeNavGraph
 import com.hussein.mynote.ui.theme.MyNoteTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@ExperimentalPagingApi
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             MyNoteTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.secondary
                 ) {
-                    Greeting("Android")
+                    HomeNavGraph(navController)
                 }
             }
         }
