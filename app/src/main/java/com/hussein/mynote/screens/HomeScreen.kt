@@ -5,6 +5,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.ExperimentalPagingApi
 @ExperimentalPagingApi
 @Composable
-fun HomeScreen(navController: NavHostController = rememberNavController()) {
+fun HomeScreen(navController: NavHostController) {
 
 }

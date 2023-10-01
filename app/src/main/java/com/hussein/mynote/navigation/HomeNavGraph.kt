@@ -17,7 +17,7 @@ fun HomeNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
         route = Routes.HOME_ROUTE,
-        startDestination = NOTES_ROUTE
+        startDestination = ADD_NOTE_SCREEN
     ) {
         composable(route = NOTES_ROUTE) {
             HomeScreen(navController = navController)
