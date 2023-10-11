@@ -4,7 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.hussein.mynote.data.di.DataBaseModule
 import com.hussein.mynote.model.Note
+import dagger.Component
+import dagger.Provides
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
@@ -12,7 +16,7 @@ interface NoteDao {
     fun getAllNotes():List<Note>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addNote(note:Note)
+    suspend fun addNote(note:Note)
 
     @Query("SELECT * FROM note_table WHERE id = :id")
     fun getNote(id : Int):Note

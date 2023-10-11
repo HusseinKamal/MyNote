@@ -1,4 +1,4 @@
-package com.hussein.mynote.screens
+package com.hussein.mynote.screens.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

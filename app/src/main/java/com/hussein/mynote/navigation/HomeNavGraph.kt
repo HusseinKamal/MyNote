@@ -1,6 +1,8 @@
 package com.hussein.mynote.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,6 +12,7 @@ import com.hussein.mynote.screens.HomeScreen
 import com.hussein.mynote.util.Routes
 import com.hussein.mynote.util.Routes.ADD_NOTE_SCREEN
 import com.hussein.mynote.util.Routes.NOTES_ROUTE
+import com.hussein.mynote.viewmodel.NoteViewModel
 
 @ExperimentalPagingApi
 @Composable
