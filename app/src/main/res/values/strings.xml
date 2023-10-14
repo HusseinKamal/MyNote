@@ -3,7 +3,11 @@
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="enter_title">Title</string>
-    <string name="enter_description">Enter your notes...</string>
     <string name="add">Add Note</string>
     <string name="home">Home</string>
+    <string name="date">Date: </string>
+
+    <!-- Messages-->
+    <string name="enter_description">Enter your notes...</string>
+    <string name="no_data_founded">No Data Founded</string>
 </resources>

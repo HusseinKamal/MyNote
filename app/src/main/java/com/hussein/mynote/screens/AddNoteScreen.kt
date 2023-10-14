@@ -57,8 +57,8 @@ fun AddNoteScreen(navController: NavHostController,noteViewModel: NoteViewModel 
     Scaffold(
         topBar = {
                  CustomTopAppBar(navController = navController, routePopup = Routes.NOTES_ROUTE, title = stringResource(
-                     id = R.string.home
-                 ))
+                     id = R.string.add
+                 ), hasBackArrow = true)
            /* TopAppBar(
                 title = {
                     androidx.compose.material.Text(
@@ -97,7 +97,7 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
 
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
-    val scope = rememberCoroutineScope()
+   /* val scope = rememberCoroutineScope()
     val notes by noteViewModel.notes.collectAsState()// ---> call notes.value direct
     when(notes){
         is ResourceState.Success -> {
@@ -112,7 +112,7 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
         is ResourceState.Error -> {
 
         }
-    }
+    }*/
     //val notes = noteViewModel.notes.collectAsState() // You should call notes.value in when code
     Column(
         modifier = Modifier

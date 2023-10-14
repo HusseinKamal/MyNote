@@ -14,7 +14,7 @@ import androidx.navigation.NavHostController
 import com.hussein.mynote.util.Routes
 
 @Composable
-fun CustomTopAppBar(title: String="Home",navController:NavHostController,routePopup:String){
+fun CustomTopAppBar(title: String="Home",navController:NavHostController,routePopup:String,hasBackArrow: Boolean){
     TopAppBar(
         title = {
             Text(
@@ -24,13 +24,20 @@ fun CustomTopAppBar(title: String="Home",navController:NavHostController,routePo
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
         navigationIcon = {
-            IconButton(onClick = { navController.navigate(routePopup){
-                popUpTo(routePopup) {
-                    inclusive = true
+            if(hasBackArrow) {
+                IconButton(onClick = {
+                    navController.navigate(routePopup) {
+                        popUpTo(routePopup) {
+                            inclusive = true
+                        }
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
                 }
-            }
-            }) {
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
             }
         }
     )
