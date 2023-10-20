@@ -38,5 +38,10 @@ class RepositoryNote @Inject constructor(
           emit(ResourceState.Error(e.localizedMessage?:"Some Error in flow"))
       }
     }
+    fun deleteNote(note: Note) {
+        coroutineScope.launch(Dispatchers.IO) {
+            noteDao.deleteNote(note.id)
+        }
+    }
 
 }

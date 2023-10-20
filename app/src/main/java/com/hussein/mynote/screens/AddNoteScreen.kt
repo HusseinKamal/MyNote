@@ -1,7 +1,9 @@
 package com.hussein.mynote.screens
 
+import android.app.TimePickerDialog
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -46,9 +49,11 @@ import com.hussein.mynote.model.Note
 import com.hussein.mynote.model.ResourceState
 import com.hussein.mynote.screens.ui.CustomTopAppBar
 import com.hussein.mynote.screens.ui.GradientButton
+import com.hussein.mynote.screens.ui.TimePickerDialog
 import com.hussein.mynote.util.Routes
 import com.hussein.mynote.viewmodel.NoteViewModel
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 
 @ExperimentalPagingApi
@@ -93,6 +98,7 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
     val context = LocalContext.current
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
+    var time by rememberSaveable { mutableStateOf("") }
     val configuration = LocalConfiguration.current
 
     val screenHeight = configuration.screenHeightDp.dp
@@ -114,6 +120,19 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
         }
     }*/
     //val notes = noteViewModel.notes.collectAsState() // You should call notes.value in when code
+    val mContext = LocalContext.current
+    // Declaring and initializing a calendar
+    val mCalendar = Calendar.getInstance()
+    val mHour = mCalendar[Calendar.HOUR_OF_DAY]
+    val mMinute = mCalendar[Calendar.MINUTE]
+
+    // Creating a TimePicker dialod
+    val mTimePickerDialog = TimePickerDialog(
+        mContext,
+        {_, mHour : Int, mMinute: Int ->
+            time = "$mHour:$mMinute"
+        }, mHour, mMinute, false
+    )
     Column(
         modifier = Modifier
             .width(screenWidth)
@@ -162,6 +181,31 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             textStyle = TextStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)
         )
         Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(all = 8.dp)
+                .fillMaxWidth()
+                .clickable {
+                    //Show Time picker dialog
+                    mTimePickerDialog.show()
+                },
+            value = time,
+            enabled = false,
+            onValueChange = {
+                time = it
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            placeholder = { Text(text = stringResource(id = R.string.time_for_note)) },
+            label = {
+                Text(
+                    text = stringResource(id = R.string.time_for_note),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 10.sp
+                )
+            },
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         GradientButton(
             text = stringResource(id = R.string.add),
             textColor = Color.White,
@@ -173,30 +217,19 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             ),
             width = screenWidth / 2,
             onClick = {
-                /* when(notes){
-                    is ResourceState.Success -> {
-
-                    }
-                    is ResourceState.Loading -> {
-
-                    }
-                    is ResourceState.Error -> {
-
-                    }
-                }*/
-                val sdf = SimpleDateFormat("'Date\n'dd-MM-yyyy '\n\nand\n\nTime\n'HH:mm:ss z")
+                //val sdf = SimpleDateFormat("'Date\n'dd-MM-yyyy '\n\nand\n\nTime\n'HH:mm:ss z")
+                //val sdf = SimpleDateFormat("HH:mm:ss")
                 // on below line we are creating a variable for
                 // current date and time and calling a simple
                 // date format in it.
-                val currentDateAndTime = sdf.format(Date())
+                //val currentDateAndTime = sdf.format(Date())
                 val note = Note(
                     title = title,
                     description = description,
-                    date = currentDateAndTime,
-                    time = currentDateAndTime
+                    //date = currentDateAndTime,
+                    time = time
                 )
                 addNoteInDB(
-                    context = context,
                     navController = navController,
                     note = note,
                     noteViewModel = noteViewModel
@@ -208,14 +241,10 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
     }
 }
 fun addNoteInDB(
-    context: Context,
     navController: NavHostController,
     note: Note,
     noteViewModel: NoteViewModel
 ) {
     noteViewModel.addNote(note = note)
     navController.navigate(Routes.NOTES_ROUTE)
-   /* val notes = noteViewModel.notes.collectLatest {
-        val item =it[0]
-    }*/
 }

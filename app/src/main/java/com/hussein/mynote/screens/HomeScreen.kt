@@ -1,6 +1,7 @@
 package com.hussein.mynote.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Colors
@@ -26,7 +28,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,17 +43,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,7 +94,7 @@ fun HomeScreen(navController: NavHostController, noteViewModel: NoteViewModel = 
                     navController.navigate(Routes.ADD_NOTE_SCREEN)//Go to Add new note screen
                 }
             ) {
-                Icon(Icons.Filled.Add,"Add Note", tint = Color.White)
+                Icon(Icons.Filled.Add,"Add Note", tint = White)
             }
         },
         content = {padding ->
@@ -108,7 +118,7 @@ fun HomeScreen(navController: NavHostController, noteViewModel: NoteViewModel = 
                 }
 
             }
-        }, backgroundColor = Color.White
+        }, backgroundColor = White
     )
 }
 
@@ -154,7 +164,7 @@ fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) 
                 count = items.size,
             ) { index ->
                 val item = items[index]
-                NoteItem(note = item)
+                NoteItem(note = item,noteViewModel = noteViewModel)
             }
         }
     }
@@ -163,54 +173,97 @@ fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) 
 }
 
 @Composable
-fun NoteItem(note: Note){
-    val context= LocalContext.current
-    Card(
-        modifier = Modifier
-            .fillMaxSize(),
-        elevation = 1.dp,
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        border = BorderStroke(width = 2.dp, color = Purple40),
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Column(modifier = Modifier
-            .padding(all = 8.dp)
-            .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            //Title
-            Text(text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(note.title)
+fun NoteItem(note: Note,noteViewModel: NoteViewModel= hiltViewModel()){
+    val iconSize = 20.dp
+    Box(modifier = Modifier.fillMaxSize()){
+        Card(
+            modifier = Modifier
+                .fillMaxSize(),
+            elevation = 3.dp,
+            backgroundColor = MaterialTheme.colorScheme.primary,
+            border = BorderStroke(width = 3.dp, color = Purple40),
+            shape = RoundedCornerShape(20.dp),
+        )
+        {
+            Column(modifier = Modifier
+                .padding(all = 8.dp)
+                .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                //Title
+                Text(text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(note.title)
+                    }
+                },
+                    color= White,
+                    fontSize = 18.sp,//androidx.compose.material.MaterialTheme.typography.caption.fontSize,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                //Description
+                Text(text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                        append(note.description)
+                    }
+                },
+                    color= White,
+                    fontSize = 16.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Card(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(30.dp),
+                    elevation = 3.dp,
+                    backgroundColor = Purple40,
+                    //border = BorderStroke(width = 2.dp, color = Purple40),
+                    shape = RoundedCornerShape(20.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(all = 4.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxSize(),
+                            textAlign = TextAlign.Center,
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Time : ${note.time}")
+                                }
+                            },
+                            color = White,
+                            fontSize = 14.sp,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-            },
-                color=Color.White,
-                fontSize = androidx.compose.material.MaterialTheme.typography.caption.fontSize,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            //Description
-            Text(text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                    append(note.description)
-                }
-            },
-                color=Color.White,
-                fontSize = 16.sp,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(modifier = Modifier.fillMaxWidth(), text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                    append(note.time)
-                }
-            },
-                color=Color.White,
-                fontSize = 16.sp,
-                overflow = TextOverflow.Ellipsis,
-            )
+            }
+        }
 
+        //Icon for Removing note
+        IconButton(
+            onClick = {
+                noteViewModel.deleteNote(note = note)
+            },
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(Purple40)
+                .size(iconSize)
+                .align(Alignment.TopEnd)
+                .padding(2.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Delete,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
+
 }

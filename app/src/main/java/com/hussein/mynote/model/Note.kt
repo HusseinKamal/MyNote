@@ -11,8 +11,8 @@ data class Note(
     var title: String?,
     @ColumnInfo(name = "description")
     var description: String?,
-    @ColumnInfo(name = "date")
-    var date: String?,
+  /*  @ColumnInfo(name = "date")
+    var date: String?,*/
     @ColumnInfo(name = "time")
     var time: String?,
 ){
