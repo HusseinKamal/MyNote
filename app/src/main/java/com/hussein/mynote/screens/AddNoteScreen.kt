@@ -1,7 +1,7 @@
 package com.hussein.mynote.screens
 
 import android.app.TimePickerDialog
-import android.content.Context
+import android.widget.TimePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,23 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,15 +41,13 @@ import androidx.navigation.NavHostController
 import androidx.paging.ExperimentalPagingApi
 import com.hussein.mynote.R
 import com.hussein.mynote.model.Note
-import com.hussein.mynote.model.ResourceState
+import com.hussein.mynote.model.validator.NoteFormEvent
 import com.hussein.mynote.screens.ui.CustomTopAppBar
 import com.hussein.mynote.screens.ui.GradientButton
-import com.hussein.mynote.screens.ui.TimePickerDialog
+import com.hussein.mynote.util.Constant
 import com.hussein.mynote.util.Routes
 import com.hussein.mynote.viewmodel.NoteViewModel
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 
 @ExperimentalPagingApi
 @Composable
@@ -64,29 +57,14 @@ fun AddNoteScreen(navController: NavHostController,noteViewModel: NoteViewModel 
                  CustomTopAppBar(navController = navController, routePopup = Routes.NOTES_ROUTE, title = stringResource(
                      id = R.string.add
                  ), hasBackArrow = true)
-           /* TopAppBar(
-                title = {
-                    androidx.compose.material.Text(
-                        text = "Home",
-                        color = Color.White
-                    )
-                },
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigate(Routes.NOTES_ROUTE){
-                        popUpTo(Routes.NOTES_ROUTE) {
-                            inclusive = true
-                        }
-                    }
-                    }) {
-                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                }
-            )*/
         },
         content =
-        { paddingValues ->
-            AddNoteView(navController,noteViewModel)
+        { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)) {// paddingValues ->
+                AddNoteView(navController, noteViewModel)
+            }
         }
     )
 }
@@ -94,47 +72,47 @@ fun AddNoteScreen(navController: NavHostController,noteViewModel: NoteViewModel 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
-    val context = LocalContext.current
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
+fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel= hiltViewModel()) {
+    //var title by rememberSaveable { mutableStateOf("") }
+    //var description by rememberSaveable { mutableStateOf("") }
     var time by rememberSaveable { mutableStateOf("") }
     val configuration = LocalConfiguration.current
 
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
-   /* val scope = rememberCoroutineScope()
-    val notes by noteViewModel.notes.collectAsState()// ---> call notes.value direct
-    when(notes){
-        is ResourceState.Success -> {
-            //Get data if founded
-            val response = (notes as ResourceState.Success).data
-            val items = response[0].description
-        }
-        is ResourceState.Loading -> {
-            //Add Loader view here
 
-        }
-        is ResourceState.Error -> {
-
-        }
-    }*/
-    //val notes = noteViewModel.notes.collectAsState() // You should call notes.value in when code
     val mContext = LocalContext.current
+    val state = noteViewModel.state
+    LaunchedEffect(key1 = mContext){
+        noteViewModel.validateEvents.collect{event ->
+            when(event){
+                is NoteViewModel.ValidationEvent.Success ->
+                {
+                    val note = event.state
+                    addNoteInDB(
+                        navController = navController,
+                        note = note,
+                        noteViewModel = noteViewModel
+                    )
+                }
+            }
+        }// ---> call notes.value direct
+
+    }
     // Declaring and initializing a calendar
     val mCalendar = Calendar.getInstance()
     val mHour = mCalendar[Calendar.HOUR_OF_DAY]
     val mMinute = mCalendar[Calendar.MINUTE]
 
-    // Creating a TimePicker dialod
+    // Creating a TimePicker dialog
     val mTimePickerDialog = TimePickerDialog(
         mContext,
-        {_, mHour : Int, mMinute: Int ->
-            time = "$mHour:$mMinute"
+        {_, mHour : Int, mMinute: Int -> state.time = "$mHour:${Constant.addZeroBefore(mMinute.toString())}"
         }, mHour, mMinute, false
     )
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())//Add scroll enable in column
             .width(screenWidth)
             .height(screenHeight)
             .background(color = MaterialTheme.colorScheme.background),
@@ -145,10 +123,11 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             modifier = Modifier
                 .padding(all = 8.dp)
                 .fillMaxWidth(),
-            value = title,
+            value = state.title,
             onValueChange = {
-                title = it
+                noteViewModel.onEvent(NoteFormEvent.TitleChanged(it))
             },
+            isError = state.titleError !=null ,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             placeholder = { Text(text = stringResource(id = R.string.title)) },
             label = {
@@ -160,16 +139,20 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
         )
+        if(state.titleError !=null){
+            Text(text = state.titleError!!, color = MaterialTheme.colorScheme.error)
+        }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             modifier = Modifier
                 .height(screenHeight / 2)
                 .padding(all = 8.dp)
                 .fillMaxWidth(),
-            value = description,
+            value = state.description,
             onValueChange = {
-                description = it
+                noteViewModel.onEvent(NoteFormEvent.DescriptionChanged(it))
             },
+            isError = state.descriptionError !=null ,
             label = {
                 Text(
                     text = stringResource(id = R.string.description),
@@ -180,6 +163,9 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             placeholder = { Text(text = stringResource(id = R.string.enter_description)) },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.primary, fontSize = 20.sp)
         )
+        if(state.descriptionError !=null){
+            Text(text = state.descriptionError!!, color = MaterialTheme.colorScheme.error)
+        }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             modifier = Modifier
@@ -188,12 +174,14 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
                 .clickable {
                     //Show Time picker dialog
                     mTimePickerDialog.show()
+                    //TimePickerDialog(content = {}, toggle = {}, onConfirm = {}, onCancel = {})
                 },
-            value = time,
+            value = state.time,
             enabled = false,
             onValueChange = {
-                time = it
+                noteViewModel.onEvent(NoteFormEvent.TimeChanged(it))
             },
+            isError = state.timeError !=null ,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             placeholder = { Text(text = stringResource(id = R.string.time_for_note)) },
             label = {
@@ -205,6 +193,9 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
         )
+        if(state.timeError !=null){
+            Text(text = state.timeError!!, color = MaterialTheme.colorScheme.error)
+        }
         Spacer(modifier = Modifier.height(8.dp))
         GradientButton(
             text = stringResource(id = R.string.add),
@@ -217,24 +208,7 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel) {
             ),
             width = screenWidth / 2,
             onClick = {
-                //val sdf = SimpleDateFormat("'Date\n'dd-MM-yyyy '\n\nand\n\nTime\n'HH:mm:ss z")
-                //val sdf = SimpleDateFormat("HH:mm:ss")
-                // on below line we are creating a variable for
-                // current date and time and calling a simple
-                // date format in it.
-                //val currentDateAndTime = sdf.format(Date())
-                val note = Note(
-                    title = title,
-                    description = description,
-                    //date = currentDateAndTime,
-                    time = time
-                )
-                addNoteInDB(
-                    navController = navController,
-                    note = note,
-                    noteViewModel = noteViewModel
-                )
-
+                noteViewModel.onEvent(NoteFormEvent.Submit)
             }
         )
 
@@ -246,5 +220,9 @@ fun addNoteInDB(
     noteViewModel: NoteViewModel
 ) {
     noteViewModel.addNote(note = note)
-    navController.navigate(Routes.NOTES_ROUTE)
+    navController.navigate(Routes.NOTES_ROUTE) {
+        popUpTo(Routes.NOTES_ROUTE) {
+            inclusive = true
+        }
+    }
 }

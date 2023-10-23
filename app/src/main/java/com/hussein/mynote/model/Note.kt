@@ -8,13 +8,14 @@ import com.hussein.mynote.util.Constant
 @Entity(tableName = Constant.NOTE_TABLE)
 data class Note(
     @ColumnInfo(name = "title")
-    var title: String?,
+    var title: String = "",
     @ColumnInfo(name = "description")
-    var description: String?,
-  /*  @ColumnInfo(name = "date")
-    var date: String?,*/
+    var description: String = "",
     @ColumnInfo(name = "time")
-    var time: String?,
+    var time: String = "",
+    var titleError: String? = "",
+    var descriptionError: String? = "",
+    var timeError: String? = ""
 ){
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")

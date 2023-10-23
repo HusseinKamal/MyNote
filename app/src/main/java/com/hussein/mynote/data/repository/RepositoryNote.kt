@@ -41,6 +41,7 @@ class RepositoryNote @Inject constructor(
     fun deleteNote(note: Note) {
         coroutineScope.launch(Dispatchers.IO) {
             noteDao.deleteNote(note.id)
+            getAllNotes()
         }
     }
 

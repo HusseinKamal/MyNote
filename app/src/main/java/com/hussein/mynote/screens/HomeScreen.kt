@@ -105,7 +105,7 @@ fun HomeScreen(navController: NavHostController, noteViewModel: NoteViewModel = 
                     is ResourceState.Success -> {
                         //Get data if founded
                         val response = (notes as ResourceState.Success).data
-                        ListContent(items = response)
+                        ListContent(items = response, navController = navController)
                     }
                     is ResourceState.Loading -> {
                         //Add Loader view here
@@ -124,7 +124,7 @@ fun HomeScreen(navController: NavHostController, noteViewModel: NoteViewModel = 
 
 @OptIn(ExperimentalPagingApi::class)
 @Composable
-fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) {
+fun ListContent(items:List<Note>,navController: NavHostController,noteViewModel: NoteViewModel= hiltViewModel()) {
    /* val notes by noteViewModel.notes.collectAsState()// ---> call notes.value direct
     when(notes){
         is ResourceState.Success -> {
@@ -152,6 +152,7 @@ fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) 
         state = rememberSwipeRefreshState(isRefreshing = refreshing),
         onRefresh = {
             refreshing = true
+            navController.navigate(Routes.NOTES_ROUTE)
                     },
     ) {
         LazyColumn(
@@ -164,7 +165,7 @@ fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) 
                 count = items.size,
             ) { index ->
                 val item = items[index]
-                NoteItem(note = item,noteViewModel = noteViewModel)
+                NoteItem(note = item, navController = navController,noteViewModel = noteViewModel)
             }
         }
     }
@@ -173,7 +174,7 @@ fun ListContent(items:List<Note>,noteViewModel: NoteViewModel= hiltViewModel()) 
 }
 
 @Composable
-fun NoteItem(note: Note,noteViewModel: NoteViewModel= hiltViewModel()){
+fun NoteItem(note: Note,navController: NavHostController,noteViewModel: NoteViewModel= hiltViewModel()){
     val iconSize = 20.dp
     Box(modifier = Modifier.fillMaxSize()){
         Card(
@@ -215,7 +216,7 @@ fun NoteItem(note: Note,noteViewModel: NoteViewModel= hiltViewModel()){
                 )
                 Card(
                     modifier = Modifier
-                        .width(100.dp)
+                        .width(120.dp)
                         .height(30.dp),
                     elevation = 3.dp,
                     backgroundColor = Purple40,
@@ -250,6 +251,7 @@ fun NoteItem(note: Note,noteViewModel: NoteViewModel= hiltViewModel()){
         IconButton(
             onClick = {
                 noteViewModel.deleteNote(note = note)
+                navController.navigate(Routes.NOTES_ROUTE)
             },
             modifier = Modifier
                 .clip(CircleShape)

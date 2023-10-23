@@ -14,4 +14,7 @@
     <!-- Messages-->
     <string name="enter_description">Enter your notes...</string>
     <string name="no_data_founded">No Data Founded</string>
+    <string name="title_required">Title is required</string>
+    <string name="description_required">Description is required</string>
+    <string name="time_required">Time is required</string>
 </resources>
