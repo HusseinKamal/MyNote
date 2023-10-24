@@ -107,7 +107,9 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel= h
     // Creating a TimePicker dialog
     val mTimePickerDialog = TimePickerDialog(
         mContext,
-        {_, mHour : Int, mMinute: Int -> state.time = "$mHour:${Constant.addZeroBefore(mMinute.toString())}"
+        {_, mHour : Int, mMinute: Int ->
+            state.time = "$mHour:${Constant.addZeroBefore(mMinute.toString())}"
+            time = "$mHour:${Constant.addZeroBefore(mMinute.toString())}"
         }, mHour, mMinute, false
     )
     Column(
@@ -176,10 +178,10 @@ fun AddNoteView(navController: NavHostController,noteViewModel: NoteViewModel= h
                     mTimePickerDialog.show()
                     //TimePickerDialog(content = {}, toggle = {}, onConfirm = {}, onCancel = {})
                 },
-            value = state.time,
+            value = time,
             enabled = false,
             onValueChange = {
-                noteViewModel.onEvent(NoteFormEvent.TimeChanged(it))
+                noteViewModel.onEvent(NoteFormEvent.TimeChanged(state.time))
             },
             isError = state.timeError !=null ,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
